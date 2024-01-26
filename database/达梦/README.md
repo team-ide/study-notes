@@ -1,0 +1,160 @@
+# 说明
+
+一个模式仅能归属于一个用户，而一个用户可以包含多个模式
+
+* 查询所有用户
+
+```sql
+SELECT USERNAME USER_NAME
+FROM DBA_USERS
+ORDER BY USERNAME
+```
+
+* 查询单个用户
+
+```sql
+SELECT USERNAME USER_NAME
+FROM DBA_USERS
+WHERE USERNAME='{user_name}';
+```
+
+* 查询所有模式
+
+```sql
+SELECT NAME AS SCHEMA_NAME
+FROM SYSOBJECTS 
+WHERE TYPE$='SCH'
+ORDER BY NAME;
+```
+
+* 查询单个模式
+
+```sql
+SELECT NAME AS SCHEMA_NAME 
+FROM SYSOBJECTS 
+WHERE TYPE$='SCH' AND NAME='{schema_name}';
+```
+
+* 查询模式所属用户
+
+```sql
+SELECT a.NAME SCHEMA_NAME, b.NAME USER_NAME
+FROM SYSOBJECTS a
+LEFT JOIN SYSOBJECTS b ON a.PID= b.ID
+WHERE a.TYPE$='SCH'
+ORDER BY a.NAME;
+```
+
+* 查询用户所有模式
+
+```sql
+SELECT a.NAME SCHEMA_NAME, b.NAME USER_NAME
+FROM SYSOBJECTS a
+LEFT JOIN SYSOBJECTS b ON a.PID= b.ID
+WHERE a.TYPE$='SCH' AND b.NAME='{user_name}';
+```
+
+* 查询单个用户
+
+```sql
+SELECT USERNAME USER_NAME
+FROM DBA_USERS
+WHERE USERNAME='{user_name}';
+```
+
+* 创建模式
+
+```sql
+CREATE SCHEMA {schema_name} AUTHORIZATION {user_name};
+```
+
+* 切换模式
+  * 只能切换到用户有权限的模式
+
+```sql
+SET SCHEMA {schema_name};
+```
+
+* 删除模式
+  * 需要清空模式下的表等数据
+
+```sql
+DROP SCHEMA {schema_name};
+```
+
+* 创建用户
+
+```sql
+CREATE USER {user_name} IDENTIFIED BY "{user_pass}";
+GRANT DBA TO {user_name};
+```
+
+* 删除用户
+  * 需要清空用户下的表等数据
+
+```sql
+DROP USER {user_name} CASCADE
+```
+
+* 查询所有表
+
+```sql
+SELECT TABLE_NAME, OWNER SCHEMA_NAME
+FROM ALL_TABLES
+ORDER BY TABLE_NAME 
+```
+
+* 查询模式所有表
+
+```sql
+SELECT TABLE_NAME, OWNER SCHEMA_NAME
+FROM ALL_TABLES
+WHERE OWNER='{schema_name}'
+ORDER BY TABLE_NAME;
+```
+
+* 查询模式单个表
+
+```sql
+SELECT TABLE_NAME, OWNER SCHEMA_NAME
+FROM ALL_TABLES
+WHERE OWNER='{schema_name}' AND TABLE_NAME='{table_name}';
+```
+
+* 查询表字段
+
+```sql
+SELECT COLUMN_NAME, DATA_DEFAULT, CHARACTER_SET_NAME, NULLABLE, DATA_TYPE, DATA_LENGTH, DATA_PRECISION, DATA_SCALE, TABLE_NAME, OWNER SCHEMA_NAME
+FROM ALL_TAB_COLUMNS
+WHERE OWNER='{schema_name}' AND TABLE_NAME='{table_name}';
+```
+
+* 查询表字段注释
+
+```sql
+SELECT t.COLUMN_NAME, tc.COMMENTS
+FROM ALL_TAB_COLUMNS t
+LEFT JOIN ALL_COL_COMMENTS tc ON(tc.OWNER=t.OWNER AND tc.TABLE_NAME=t.TABLE_NAME AND tc.COLUMN_NAME=t.COLUMN_NAME)
+WHERE t.OWNER='{schema_name}' AND t.TABLE_NAME='{table_name}';
+```
+
+* 查询表主键
+
+```sql
+SELECT t1.COLUMN_NAME, t2.TABLE_NAME, t2.OWNER SCHEMA_NAME
+FROM ALL_CONS_COLUMNS t1
+LEFT JOIN ALL_CONSTRAINTS t2 ON (t2.CONSTRAINT_NAME = t1.CONSTRAINT_NAME)
+WHERE t2.OWNER='{schema_name}' AND t2.TABLE_NAME='{table_name}' AND t2.CONSTRAINT_TYPE = 'P'
+```
+
+* 查询表索引
+
+```sql
+
+SELECT t1.INDEX_NAME indexName, t1.COLUMN_NAME columnName, t1.TABLE_OWNER ownerName, t1.TABLE_NAME tableName, t2.UNIQUENESS 
+FROM ALL_IND_COLUMNS t1
+LEFT JOIN ALL_INDEXES t2 ON (t2.INDEX_NAME = t1.INDEX_NAME)
+LEFT JOIN ALL_CONSTRAINTS t3 ON (t3.CONSTRAINT_NAME = t1.INDEX_NAME)
+WHERE t1.TABLE_OWNER='{schema_name}' AND t1.TABLE_NAME='{table_name}' AND (t3.CONSTRAINT_TYPE !='P' OR t3.CONSTRAINT_TYPE = '' OR t3.CONSTRAINT_TYPE IS NULL)
+
+```
