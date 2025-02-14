@@ -17,7 +17,8 @@ Anything LLM可以接受各种格式的外部资料，比如PDF、Word（DOC、D
 聊天设置 -> 设置ollama作为llm供应商
 设置ollama model为离线安装的deepseek-r1:8b
 向量数据库 -> 使用默认配置
-代理配置  -> 向量化引擎(Embedder首选项) 选择 ollama 后 ,使用 nomic-embed-text
+
+  -> 向量化引擎(Embedder首选项) 选择 ollama 后 ,使用 nomic-embed-text
 
 * 上传本地资料
 点击工作空间
